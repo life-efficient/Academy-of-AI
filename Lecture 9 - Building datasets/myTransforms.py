@@ -22,8 +22,7 @@ class ToTorchTensor():
             img = np.expand_dims(img, 0)
 
         img = img.transpose((2, 0, 1))
-
-        return torch.Tensor(img), torch.Tensor(gender)
+        return torch.Tensor(img), torch.from_numpy(np.array(gender))
 
 
 resize = Resize((20, 20))
