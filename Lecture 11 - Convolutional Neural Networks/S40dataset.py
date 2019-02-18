@@ -28,6 +28,7 @@ class S40dataset():
     def __getitem__(self, idx):
         img_name = self.img_names[idx]
         img = Image.open(img_name)
+        print(img_name)
 
         annotation_name = self.annotation_names[idx]
         annotation_tree = ET.parse(annotation_name)
@@ -92,15 +93,13 @@ def show(batch, pred_bndbox=None):
     draw.rectangle(bndbox)
     if pred_bndbox is not None:
         pred_bndbox = unpack_bndbox(pred_bndbox, img)
-        draw.rectangle(pred_bndbox)
+        draw.rectangle(pred_bndbox, outline=1000)
     img.show()
 
 
 '''
 dset = S40dataset()
-dset[0]
 
-import numpy as np
-idx = np.random.randint(len(dset))
-dset.show(idx)
+
+show(batch)
 '''

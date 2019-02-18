@@ -9,7 +9,7 @@ import time
 # HYPERPARAMETERS
 batch_size = 4
 epochs = 1
-lr = 0.001
+lr = 0.00001
 
 transform = transforms.Compose([
     transforms.Resize((64, 64)),
@@ -32,10 +32,17 @@ train_loader = DataLoader(train_data,
 
 test_loader = DataLoader(test_data,
                          batch_size=batch_size)
+for i in test_loader:
+    b = i
+    break
+import numpy as np
+idx = np.random.randint(len(test_loader))
+S40dataset.show(b)
 
-channels1 = 64
-channels2 = 128
-channels3 = 16
+channels1 = 128
+channels2 = 64
+channels3 = 64
+channels4 = 64
 
 class DetectCNN(torch.nn.Module):
 
@@ -43,24 +50,35 @@ class DetectCNN(torch.nn.Module):
         super().__init__()
         self.conv = torch.nn.Sequential(
             torch.nn.Conv2d(3, channels1, 7),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(channels1),
+            torch.nn.Dropout(0.5),
             torch.nn.Conv2d(channels1, channels2, 7),
-            torch.nn.Conv2d(channels2, channels3, 7)
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(channels2),
+            torch.nn.Dropout(0.5),
+            torch.nn.Conv2d(channels2, channels3, 7),
+            torch.nn.ReLU(),
+            torch.nn.BatchNorm2d(channels3)
+            #torch.nn.Sigmoid()
         )
         self.fc = torch.nn.Sequential(
-            torch.nn.Linear(16*46*46, 4)#,
-            #torch.nn.Sigmoid()
+            torch.nn.Linear(64*46*46, 4),
+            #torch.nn.ReLU()
+            torch.nn.Sigmoid()
         )
 
     def forward(self, x):
         x = self.conv(x)
-        #print(x.shape)
-        x = x.view(-1, 16*46*46)
+        print(x.shape)
+
+        x = x.view(-1, 64*46*46)
         x = self.fc(x)
         return x
 
 cnn = DetectCNN()
 criterion = torch.nn.MSELoss()
-optimiser = torch.optim.SGD(params=cnn.parameters(), lr=lr, momentum=0.8, weight_decay=1)
+optimiser = torch.optim.Adam(params=cnn.parameters(), lr=lr, weight_decay=1)
 
 def train(model):
     plt.ion()
@@ -69,6 +87,7 @@ def train(model):
     plt.xlabel('Batch')
     plt.ylabel('Loss')
     plt.show()
+    #plt.ylim(0, 1)
 
     train_losses = []
     for epoch in range(epochs):
@@ -85,13 +104,15 @@ def train(model):
             train_losses.append(loss.item())
             ax.plot(train_losses)
             fig.canvas.draw()
-            if batch_idx == 30:
-                break
+            if batch_idx == 200:
+                #break
+                pass
 
 train(cnn)
-torch.save(cnn.state_dict(), str(time))
+torch.save(cnn.state_dict(), str(time.time()))
 
 def test(model):
+    model.eval()
     for idx, batch in enumerate(test_loader):
         print(type(batch))
         x, y = batch
