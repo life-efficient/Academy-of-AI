@@ -60,11 +60,9 @@ class DetectCNN(torch.nn.Module):
             torch.nn.Conv2d(channels2, channels3, 7),
             torch.nn.ReLU(),
             torch.nn.BatchNorm2d(channels3)
-            #torch.nn.Sigmoid()
         )
         self.fc = torch.nn.Sequential(
             torch.nn.Linear(64*46*46, 4),
-            #torch.nn.ReLU()
             torch.nn.Sigmoid()
         )
 
